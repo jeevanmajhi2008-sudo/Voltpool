@@ -1,0 +1,20 @@
+#Voltpool
+(https://voltpoolg.netlify.app)
+
+Airbnb for EV charging. Charger owners list their home or business chargers, and EV drivers find, book and pay for charging sessions nearby.
+
+Built by Xerxes for Unstop's Build Your MVP – 14 Day Challenge.
+
+# Features
+- Drivers:find chargers on a map, book instantly or use Charge now, start securely with a PIN, and use a wallet and coupons
+- Hosts: list chargers with photos, set prices by time of day and demand, accept or counter price offers, and chat with drivers
+- Admin: a platform overview and support tickets
+- Help chat: AI answers, with a built-in FAQ and an option to reach a real person
+
+# Business model
+VoltPool takes a 15% commission on every session. It also earns from mobile van charging, Premium plans and featured listings.
+
+# Tech
+A single-page web app (HTML, CSS and JavaScript) with a shared data store and a localStorage fallback. It needs no hardware.
+
+#Run it
