@@ -1,0 +1,338 @@
+<title>VoltPool MVP Blueprint</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: single reading column (~72ch) with wide tables in their own scrollers; sections are plain, the plan is a real sequence */
+:root{
+  --bg:#F3F6F5; --surface:#FFFFFF; --ink:#13201D; --muted:#56655F; --line:#D5DEDA;
+  --accent:#0E7C6B; --accent-soft:#DCEFEA; --amber:#B7790B; --amber-soft:#FBEFD5;
+  --good:#1E7A3C; --bad:#B4382C; --bad-soft:#F8E1DD; --good-soft:#E0F1E5;
+  --f-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body:"IBM Plex Sans", system-ui, -apple-system, sans-serif;
+  --f-mono:"IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0F1614; --surface:#16201D; --ink:#E4ECE9; --muted:#9AABA4; --line:#2A3833;
+  --accent:#4CC3AE; --accent-soft:#16352F; --amber:#E9B34A; --amber-soft:#3A2C0F;
+  --good:#6BCB87; --bad:#EE8A7E; --bad-soft:#3B1D19; --good-soft:#173322; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F1614; --surface:#16201D; --ink:#E4ECE9; --muted:#9AABA4; --line:#2A3833;
+  --accent:#4CC3AE; --accent-soft:#16352F; --amber:#E9B34A; --amber-soft:#3A2C0F;
+  --good:#6BCB87; --bad:#EE8A7E; --bad-soft:#3B1D19; --good-soft:#173322; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.6}
+.wrap{max-width:860px;margin:0 auto;padding-block:40px 80px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.15;margin:0}
+h1{font-size:clamp(2rem,5vw,3rem);font-weight:800;letter-spacing:-.02em}
+h2{font-size:1.6rem;font-weight:800;margin-top:56px;padding-top:20px;border-top:2px solid var(--ink)}
+h3{font-size:1.15rem;font-weight:600;margin-top:28px}
+p,li{max-width:70ch}
+.eyebrow{font-family:var(--f-mono);font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
+.lede{font-size:1.15rem;color:var(--muted);margin-top:12px}
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+.chip{font-family:var(--f-mono);font-size:.75rem;padding:4px 10px;border:1px solid var(--line);border-radius:99px;background:var(--surface);color:var(--muted)}
+.verdict{margin-top:28px;background:var(--accent-soft);border-left:4px solid var(--accent);padding:18px 20px;border-radius:0 8px 8px 0}
+.verdict p{margin:6px 0 0}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:16px}
+.col{min-width:0;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:16px 18px}
+.col h4{margin:0 0 8px;font-family:var(--f-mono);font-size:.78rem;letter-spacing:.08em;text-transform:uppercase}
+.col.pro h4{color:var(--good)} .col.con h4{color:var(--bad)}
+.col ul{margin:0;padding-left:18px} .col li{margin:6px 0}
+.tbl{overflow-x:auto;margin-top:16px;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.92rem;min-width:560px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--f-mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);background:var(--bg)}
+tr:last-child td{border-bottom:0}
+td.n{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+code,.mono{font-family:var(--f-mono);font-size:.88em}
+code{background:var(--accent-soft);padding:1px 5px;border-radius:4px}
+.callout{margin-top:16px;padding:14px 16px;border-radius:8px;background:var(--amber-soft);border:1px solid var(--amber)}
+.callout strong{color:var(--amber)}
+pre.mermaid{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:16px;overflow-x:auto;margin-top:16px}
+.math{font-family:var(--f-mono);font-size:.9rem;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px 16px;overflow-x:auto;white-space:pre;line-height:1.7}
+.tag{display:inline-block;font-family:var(--f-mono);font-size:.7rem;padding:1px 7px;border-radius:4px;margin-right:4px}
+.tag.must{background:var(--accent-soft);color:var(--accent)} .tag.later{background:var(--amber-soft);color:var(--amber)}
+.day{font-family:var(--f-mono);font-weight:500;color:var(--accent);white-space:nowrap}
+footer{margin-top:56px;color:var(--muted);font-size:.85rem}
+</style>
+
+<div class="wrap">
+  <div class="eyebrow">Unstop · Build Your MVP · 14-day challenge · Version 3</div>
+  <h1>VoltPool: Airbnb for EV chargers, booked like a ride</h1>
+  <p class="lede">The idea, the pros and cons, the full technical picture behind it, and the exact plan to ship the web MVP in 14 days.</p>
+  <div class="meta"><span class="chip">Peer-to-peer charger sharing</span><span class="chip">Airbnb-style listings</span><span class="chip">Uber/Rapido-style matching</span><span class="chip">India · ₹ pricing</span><span class="chip">Separate Driver and Host apps</span><span class="chip">Web app, no hardware</span></div>
+
+  <div class="verdict">
+    <strong>Short verdict</strong>
+    <p>A strong, focused MVP idea. The problem (too few charging points) is real, the model is easy to explain, and the core flow can be fully demonstrated as a web app. Version 2 borrows what works from two proven businesses. From Airbnb come trust, choice and hosts earning from something they already own. From Uber and Rapido come speed: one tap to get matched, live tracking, a start PIN, and peak pricing. The hard parts are still not the software. They are getting enough hosts in one area, trusting the energy reading, and keeping drivers from paying hosts directly.</p>
+  </div>
+
+  <h2>What's new in version 3</h2>
+  <p>Version 3 splits VoltPool into two linked apps and adds the marketplace tools of OLX, inDrive and Uber. Everything below works in the demo: switch between <b>Driver app</b> and <b>Host app</b> at the top and watch each action show up on the other side.</p>
+  <div class="tbl"><table>
+    <tr><th>Feature</th><th>Borrowed from</th><th>What it does in VoltPool</th></tr>
+    <tr><td>Two linked portals: Driver app and Host app (plus Admin)</td><td>Uber (rider app vs driver app)</td><td>Each side has its own tabs, colour and notifications. A booking, offer, arrival, PIN or stop on one side shows up live on the other. The Driver app can jump straight to the Host app when the host needs to act.</td></tr>
+    <tr><td>Camera on both sides</td><td>OLX, Uber Eats proof photos</td><td>Hosts take photos of the charger, parking and plug. Drivers take a check-in photo when they plug in, attach a photo to report a problem, add photos to reviews and send photos in chat. On phones the button opens the camera.</td></tr>
+    <tr><td>Ad-style listings with photo gallery and specs</td><td>OLX / Quikr</td><td>Hosts "Post an ad" with photos, description, brand and model, efficiency, supply phase, cable length, BIS certification, install and service dates. Drivers see a gallery and a technical details table.</td></tr>
+    <tr><td>Time-of-day pricing</td><td>Uber surge, hotel night rates</td><td>Hosts set a multiplier for morning, daytime, evening and night (for example +20% at night) with sliders, and preview what drivers will see.</td></tr>
+    <tr><td>Demand pricing</td><td>Uber surge</td><td>Optional: VoltPool adds 5% when demand is medium and 15% when high. Drivers see the full breakdown: base × time of day × demand.</td></tr>
+    <tr><td>Price offers and counter-offers</td><td>inDrive, Rapido "offer your fare"</td><td>Drivers can "Offer your price" (70–100% of the listing). The host accepts, counters or declines. Hosts set an auto-accept rule, such as accept anything at 85% or more.</td></tr>
+    <tr><td>Notifications for drivers and hosts</td><td>Uber / Swiggy</td><td>A bell with unread count in each app, and a badge on the other app's switch. Covers requests, offers, counters, accept/decline, on the way, arrived, check-in photo, charging started, problem reported, payment, earnings, ratings, offers.</td></tr>
+    <tr><td>Market offers that change with time</td><td>Swiggy / Zomato offer banners</td><td>Driver coupons: FIRST50, MORNING15 (mornings), VOLT20, NIGHTOWL (nights). Host offers: FEE10 (10% fee in quiet hours), BOOST24 (featured listing), EVENINGX2 (₹50 bonus per evening session). Each card shows when it is live and a countdown.</td></tr>
+    <tr><td>Host dashboard</td><td>Uber driver app, Airbnb host app</td><td>Live session card (driver on the way, enter PIN, kWh and earnings ticking, Stop), incoming requests and offers, messages, market tip, and earnings after fee and electricity cost.</td></tr>
+  </table></div>
+
+  <h3 style="margin-top:20px">How the v3 features work technically</h3>
+  <div class="tbl"><table>
+    <tr><th>Piece</th><th>How it is built (production)</th></tr>
+    <tr><td>Two portals, one backend</td><td>One API with role-based access (driver, host, admin). Each app subscribes to a WebSocket channel per booking, so a state change by one side pushes to the other in under a second. Bookings follow one state machine: <code>negotiating → requested → confirmed → enroute → arrived → charging → done</code>, with <code>declined</code> and <code>cancelled</code> exits.</td></tr>
+    <tr><td>Camera and photos</td><td>Web: <code>&lt;input type="file" accept="image/*" capture="environment"&gt;</code> opens the phone camera with no app install. Resize in the browser (canvas, ~1280 px JPEG), upload straight to object storage with a pre-signed URL (AWS S3 Mumbai or Cloudinary), strip EXIF location for privacy, and run an automatic check (e.g. AWS Rekognition) to block unsafe images. Check-in photos are kept with the session as dispute evidence.</td></tr>
+    <tr><td>Pricing engine</td><td>Price = base × time-band multiplier × demand multiplier, clamped by a platform floor and ceiling. Demand level per H3 cell = drivers searching ÷ free chargers over the last 15 minutes, computed every few minutes and cached in Redis. The price is locked when the booking is confirmed so it cannot change mid-session.</td></tr>
+    <tr><td>Negotiation</td><td>A <code>price_offers</code> row per round with an expiry (e.g. 3 minutes). Rules: offer must be 70–100% of the current price; at most 2 counters; the host's auto-accept rule runs server-side instantly. Accepting re-computes the wallet hold at the agreed price.</td></tr>
+    <tr><td>Notifications</td><td>An event bus (booking events) feeds a notification service that writes an in-app inbox row and sends push via Firebase Cloud Messaging, with WhatsApp or SMS fallback for critical ones (request waiting, driver arrived). Users choose which types they get.</td></tr>
+    <tr><td>Offers engine</td><td>Offers table with audience (driver / host), time windows, demand conditions, caps and budgets. Driver coupons are paid by VoltPool, so host payouts never drop. Host offers change the commission rate or add a bonus, recorded per session for clean accounting.</td></tr>
+  </table></div>
+
+  <h2>What's new in version 2</h2>
+  <p>These are the features added on top of the first prototype. All of them work in the demo app.</p>
+  <div class="tbl"><table>
+    <tr><th>Feature</th><th>Borrowed from</th><th>What it does in VoltPool</th></tr>
+    <tr><td>Listing page with cover, amenities, reviews</td><td>Airbnb</td><td>Each charger looks like a stay: photo banner, what the place offers (parking, CCTV, café, washroom), written reviews and the host's cancellation policy.</td></tr>
+    <tr><td>Super Host and verified host</td><td>Airbnb</td><td>Badge for hosts rated 4.8+ over 10 sessions; host card shows verified ID, hosting since, and reply time.</td></tr>
+    <tr><td>Instant book vs request to book</td><td>Airbnb</td><td>Shops can take bookings instantly; homeowners can approve each driver first. Hosts switch this per listing.</td></tr>
+    <tr><td>Save to favourites</td><td>Airbnb</td><td>Heart any charger; filter to "Saved only"; saved list in My charging.</td></tr>
+    <tr><td>In-app chat with host</td><td>Airbnb / Uber</td><td>Message the host with quick replies ("Where do I park?"); phone numbers stay private.</td></tr>
+    <tr><td>Host requests inbox</td><td>Airbnb</td><td>Hosts see pending requests with driver rating and expected earnings, and accept or decline.</td></tr>
+    <tr><td>Flexible / moderate cancellation</td><td>Airbnb + Uber</td><td>Free cancel before you start driving; a small fee for late cancels on moderate listings.</td></tr>
+    <tr><td>"Charge now" instant match</td><td>Uber / Rapido</td><td>One tap finds the best free charger for your EV by distance, price and rating, with "next option".</td></tr>
+    <tr><td>Live route and arrival time</td><td>Uber / Rapido</td><td>Booking moves through Booked → On the way → Arrived → Charging → Done, with a moving marker and minutes left.</td></tr>
+    <tr><td>Start PIN (OTP)</td><td>Rapido / Ola</td><td>On arrival the driver shares a 4-digit PIN with the host; the session only starts when it matches. Stops fake or wrong-person sessions.</td></tr>
+    <tr><td>Peak and night pricing</td><td>Uber surge</td><td>Smart pricing: +20% in the evening peak, −15% at night, shown with the original price struck out. In version 3 hosts set these per time of day themselves.</td></tr>
+    <tr><td>Charging van rescue</td><td>Uber (on-demand dispatch)</td><td>If the battery is too low to reach a charger, book a van with a portable charger that drives to you. ₹199 call-out plus energy.</td></tr>
+    <tr><td>Wallet and promo codes</td><td>Uber / Rapido / Paytm</td><td>Prepaid wallet with top-ups, transaction history, and codes like FIRST50, VOLT20 and NIGHT10.</td></tr>
+    <tr><td>Two-sided ratings</td><td>Airbnb + Uber</td><td>Drivers rate hosts and van operators; hosts see a driver's rating before accepting.</td></tr>
+  </table></div>
+
+  <h2>1. Pros and cons</h2>
+  <div class="cols">
+    <div class="col pro"><h4>Pros</h4><ul>
+      <li>Real gap. India has far fewer public chargers than its growing EV fleet needs, and range anxiety is a top reason people delay buying an EV.</li>
+      <li>Asset-light. Hosts already own the charger or socket, so you build a network without capex.</li>
+      <li>Hosts earn on an idle asset. A home charger sits unused most of the day.</li>
+      <li>Huge, cheap 2-wheeler and 3-wheeler segment. A shop with an earthed 15A socket can become a host on day one.</li>
+      <li>Shop hosts get extra footfall: drivers buy coffee or groceries while they charge.</li>
+      <li>Familiar patterns. Indians already trust "book a stay" and "book a ride" apps, so there is little to learn.</li>
+      <li>Several revenue lines: session commission, van rescues, and later a driver pass and featured listings.</li>
+    </ul></div>
+    <div class="col con"><h4>Cons</h4><ul>
+      <li>Chicken-and-egg. Drivers need hosts nearby and hosts need drivers. You must launch one neighbourhood at a time.</li>
+      <li>Trust and safety: strangers on private property, damage, overstaying. Needs KYC, ratings and a deposit.</li>
+      <li>Metering. Without a smart charger or plug, the kWh billed is an estimate, which invites disputes.</li>
+      <li>Small ticket size. A scooter session earns ₹4–5 in commission, so you need volume.</li>
+      <li>Electricity rules. Charging strangers from a normal domestic meter is a grey area in some states. See section 9.</li>
+      <li>Leakage. A regular driver may start paying the host directly after the first visit.</li>
+      <li>The van service needs vehicles, staff and portable chargers, so start it with one partner, not your own fleet.</li>
+    </ul></div>
+  </div>
+
+  <h2>2. The Airbnb and Uber blend</h2>
+  <p>VoltPool sits between the two models. The supply side (hosts and their chargers) behaves like Airbnb: fixed places, chosen and trusted through listings and reviews. The demand side (a driver who needs charge now) behaves like Uber or Rapido: urgent, location-based, and solved with matching and live tracking.</p>
+  <div class="tbl"><table>
+    <tr><th>Concept</th><th>Airbnb</th><th>Uber / Rapido</th><th>VoltPool</th></tr>
+    <tr><td>Supply</td><td>Homes and rooms</td><td>Drivers and vehicles</td><td>Home and shop chargers, plus rescue vans</td></tr>
+    <tr><td>Discovery</td><td>Search, filters, map</td><td>Automatic match</td><td>Both: browse with filters, or tap Charge now</td></tr>
+    <tr><td>Booking unit</td><td>Nights</td><td>A trip</td><td>A charging slot, billed per kWh</td></tr>
+    <tr><td>Trust</td><td>Reviews, Superhost, ID</td><td>Ratings, OTP, live tracking</td><td>Reviews, Super Host, verified ID, start PIN, live tracking</td></tr>
+    <tr><td>Pricing</td><td>Host sets price, smart pricing</td><td>Dynamic surge</td><td>Host sets base price; optional peak and night adjustment</td></tr>
+    <tr><td>Revenue</td><td>Service fees</td><td>Commission per trip</td><td>15% per session; 20% of van rescues</td></tr>
+  </table></div>
+
+  <h2>3. The full technical picture</h2>
+  <h3>Listing and discovery</h3>
+  <ul>
+    <li><strong>Listing.</strong> Host adds location (lat/lng), connector, power (kW), base price per kWh, hours, amenities, photos, instant book, smart pricing and cancellation policy. Indian connectors to support: <code>15A socket</code>, <code>Bharat AC-001</code>, <code>Type 2 AC</code>, <code>CCS2 DC</code>, <code>LECCS</code>.</li>
+    <li><strong>Geo-search.</strong> Store points in Postgres with PostGIS and query with <code>ST_DWithin</code> for "chargers within 5 km". At bigger scale, index by H3 hexagons or Redis <code>GEOSEARCH</code> for millisecond lookups.</li>
+    <li><strong>Search ranking.</strong> Compatible plug first, then a score from distance, price, rating, availability and host reply rate.</li>
+  </ul>
+  <h3>Matching ("Charge now")</h3>
+  <ul>
+    <li>Filter: active, free now, plug fits the driver's EV, open at this hour.</li>
+    <li>Score each candidate: <code>score = 1.2 × km + 0.25 × ₹/kWh − 1.5 × rating + busy penalty</code> (the demo uses this formula). Lowest score wins. Later, learn the weights from which matches drivers accept.</li>
+    <li>Offer the best match with a short hold (for example 60 seconds) so two drivers are not given the same charger at the same time. Use a Redis lock or a database row lock.</li>
+  </ul>
+  <h3>Live tracking and ETA</h3>
+  <ul>
+    <li>The driver's phone sends GPS every few seconds while a booking is "on the way". The server pushes updates to the host over WebSockets (Socket.IO, Ably or Supabase Realtime).</li>
+    <li>ETA comes from a routing service: Google Distance Matrix, Mapbox, or free OSRM on OpenStreetMap data. The demo estimates it from distance at city speed.</li>
+    <li>Rescue vans use the same pipeline in reverse: the van streams its location to the driver.</li>
+  </ul>
+  <h3>Booking state machine</h3>
+  <p>Every booking moves through fixed states, saved with timestamps so disputes can be checked later: <code>requested → confirmed → en_route → arrived → charging → completed</code>, with <code>cancelled</code> and <code>no_show</code> as exits. Each change triggers a notification and is only allowed from the right previous state.</p>
+  <h3>Start PIN</h3>
+  <ul>
+    <li>When a booking is confirmed, the server generates a random 4-digit PIN and stores only its hash. The driver sees the PIN; the host enters it in the host app. A match moves the booking to "charging".</li>
+    <li>With smart chargers later, the PIN or a QR scan can unlock the charger directly through OCPP <code>RemoteStartTransaction</code>.</li>
+  </ul>
+  <h3>Pricing</h3>
+  <ul>
+    <li><code>price = base × time multiplier × demand multiplier</code>, capped (for example at 1.5×). Time multiplier in the demo: 1.2 in the evening peak (6–10 pm), 0.85 at night (11 pm–6 am).</li>
+    <li>Demand multiplier later: open booking requests ÷ free chargers in the same H3 cell over the last 15 minutes.</li>
+    <li>Always show the price before booking and lock it for that booking, so drivers never get a surprise.</li>
+  </ul>
+  <h3>Metering</h3>
+  <ul>
+    <li>Level 1 (MVP): energy = (target % − current %) × battery kWh ÷ 0.92, confirmed by both sides.</li>
+    <li>Level 2: a Wi-Fi smart plug or energy meter reports real kWh to the API.</li>
+    <li>Level 3: OCPP 1.6J or 2.0.1 smart chargers send start, stop and <code>MeterValues</code> over WebSocket to your OCPP server.</li>
+  </ul>
+  <h3>Payments, wallet and promos</h3>
+  <ul>
+    <li><strong>Holds.</strong> Block an estimated amount (110% of the estimate) at booking with a UPI one-time mandate or card pre-authorisation, then capture only the real amount when charging ends.</li>
+    <li><strong>Split payouts.</strong> Razorpay Route or Cashfree Easy Split sends 85% to the host's bank or UPI and keeps 15%. Payouts can run weekly.</li>
+    <li><strong>Wallet.</strong> Keep a double-entry ledger (every rupee has a debit and a credit line), never just a balance number. Holding prepaid customer money needs a payment partner's licensed wallet or RBI PPI rules, so use the gateway's product rather than building your own.</li>
+    <li><strong>Promos.</strong> A rules table: code, discount type, cap, conditions (first charge, night only, minimum amount), usage limit per user. The platform pays for the discount, so the host's payout does not change.</li>
+  </ul>
+  <h3>Chat, notifications and trust</h3>
+  <ul>
+    <li>Chat over WebSockets, stored per booking. Calls go through number masking (for example Exotel), so neither side sees the other's phone number.</li>
+    <li>Notifications: push (Firebase Cloud Messaging), SMS, and WhatsApp Business API for booking confirmations and "charging finished".</li>
+    <li>KYC: phone OTP for everyone; DigiLocker or Aadhaar-based eKYC through a provider for hosts and van operators.</li>
+    <li>Ratings on both sides, Super Host rules, and automatic flags for too many cancellations or disputes.</li>
+    <li>Personal data follows India's Digital Personal Data Protection Act, 2023: collect only what is needed, get consent, allow deletion.</li>
+  </ul>
+  <h3>Charging van dispatch</h3>
+  <ul>
+    <li>Vans are supply that moves, like Uber drivers. Each van reports location and remaining battery; dispatch picks the nearest van with enough energy.</li>
+    <li>Pricing: fixed call-out fee plus per-kWh energy. The van partner keeps 80%, VoltPool 20%.</li>
+    <li>Start with one partner and one or two vans in a single area, at fixed hours.</li>
+  </ul>
+
+  <h2>4. Architecture</h2>
+  <pre class="mermaid">
+flowchart LR
+  D[Driver app] -->|REST + WebSocket| GW[API gateway]
+  H[Host app] -->|REST + WebSocket| GW
+  V[Van operator app] --> GW
+  A[Admin dashboard] --> GW
+  GW --> BK[Booking and matching service]
+  GW --> RT[Realtime service<br/>location, chat]
+  BK --> DB[(Postgres + PostGIS)]
+  BK --> RD[(Redis<br/>geo index, locks)]
+  RT --> RD
+  BK --> PAY[Payments<br/>holds, wallet, split payouts]
+  BK --> EV[[Event bus]]
+  EV --> NOTIF[Notification service<br/>inbox, push, WhatsApp]
+  BK --> PR[Pricing and offers engine]
+  BK --> NEG[Price offers]
+  GW --> MEDIA[Photo upload<br/>S3 / Cloudinary]
+  BK --> MAPS[Routing and ETA]
+  OCPP[Smart chargers via OCPP] --> BK
+  </pre>
+  <p>For the 14-day MVP this collapses into one web app with browser storage. Payments, metering, host replies and travel are simulated, but the screens and the booking states are the same as the real system.</p>
+
+  <h2>5. Features</h2>
+  <div class="tbl"><table>
+    <tr><th>Who</th><th>Feature</th><th>Scope</th></tr>
+    <tr><td>Driver</td><td>Map and list, "fits my EV" filter, price limit, free now, instant book, saved only, sort by best match</td><td><span class="tag must">MVP</span></td></tr>
+    <tr><td>Driver</td><td>Listing page: cover, amenities, host card, reviews, cancellation policy, favourite</td><td><span class="tag must">MVP</span></td></tr>
+    <tr><td>Driver</td><td>Charge now matching; charging van rescue</td><td><span class="tag must">MVP</span></td></tr>
+    <tr><td>Driver</td><td>Booking states, live route and ETA, start PIN, live session, receipt, rating</td><td><span class="tag must">MVP</span></td></tr>
+    <tr><td>Driver</td><td>Wallet, UPI, promo codes, chat with host, My charging with savings</td><td><span class="tag must">MVP</span></td></tr>
+    <tr><td>Host</td><td>List charger with amenities and pin; instant book, smart pricing, pause; requests inbox; earnings</td><td><span class="tag must">MVP</span></td></tr>
+    <tr><td>Platform</td><td>Sessions, booking value, commission and van revenue</td><td><span class="tag must">MVP</span></td></tr>
+    <tr><td>Host</td><td>Separate Host app: post ads with camera photos and specs, time-of-day and demand pricing, auto-accept rule, accept / counter / decline offers, enter driver PIN, live session, host offers</td><td><span class="tag must">MVP (v3)</span></td></tr>
+    <tr><td>Driver</td><td>Offer your price, photo gallery and specs, check-in and problem photos, review photos, time-limited coupons</td><td><span class="tag must">MVP (v3)</span></td></tr>
+    <tr><td>Both</td><td>Notification bell with unread counts, cross-app badges, chat with photos</td><td><span class="tag must">MVP (v3)</span></td></tr>
+    <tr><td>All</td><td>Real payments, KYC, OTP login, push and WhatsApp notifications, number masking</td><td><span class="tag later">Later</span></td></tr>
+    <tr><td>All</td><td>Smart plug and OCPP metering, demand-based pricing, route planner for long trips, driver pass subscription</td><td><span class="tag later">Later</span></td></tr>
+  </table></div>
+
+  <h2>6. Data model</h2>
+  <div class="tbl"><table>
+    <tr><th>Table</th><th>Key fields</th></tr>
+    <tr><td class="n">users</td><td>id, name, phone, roles (driver / host / van_operator / admin), kyc_status, rating</td></tr>
+    <tr><td class="n">vehicles</td><td>id, user_id, model, battery_kwh, max_ac_kw, max_dc_kw, plugs[]</td></tr>
+    <tr><td class="n">chargers</td><td>id, host_id, title, kind, location (geography), connector, power_kw, base_price, hours, amenities[], instant_book, smart_pricing, cancel_policy, active, rating</td></tr>
+    <tr><td class="n">bookings</td><td>id, kind (charger / van), charger_id, driver_id, vehicle_id, status, slot_start, target_pct, locked_price, hold_amount, pin_hash, promo_id, state timestamps</td></tr>
+    <tr><td class="n">sessions</td><td>id, booking_id, started_at, ended_at, kwh, energy_amount, callout_fee, discount, commission, payout, meter_source</td></tr>
+    <tr><td class="n">location_pings</td><td>booking_id, actor (driver / van), lat, lng, ts (short retention)</td></tr>
+    <tr><td class="n">wallet_ledger</td><td>id, user_id, booking_id, direction (debit / credit), amount, reason, created_at</td></tr>
+    <tr><td class="n">payments</td><td>id, booking_id, gateway_ref, type (hold / capture / refund / payout), status</td></tr>
+    <tr><td class="n">promos</td><td>code, type (percent / flat), value, cap, rules, per_user_limit, valid_until</td></tr>
+    <tr><td class="n">messages</td><td>id, booking_id or charger_id, from_user, body, created_at</td></tr>
+    <tr><td class="n">reviews</td><td>id, booking_id, from_user, to_user, stars, text</td></tr>
+    <tr><td class="n">charger_photos</td><td>id, charger_id, url, position, uploaded_by, moderation_status</td></tr>
+    <tr><td class="n">charger_specs</td><td>charger_id, brand, model, efficiency_pct, phase, cable_m, certification, installed_on, serviced_on</td></tr>
+    <tr><td class="n">price_bands</td><td>charger_id, band (morning / day / evening / night), multiplier, demand_pricing_on</td></tr>
+    <tr><td class="n">price_offers</td><td>id, booking_id, from (driver / host), price, status (pending / countered / accepted / declined / expired), expires_at</td></tr>
+    <tr><td class="n">session_photos</td><td>id, booking_id, kind (check_in / problem / review), url, created_at</td></tr>
+    <tr><td class="n">notifications</td><td>id, user_id, role, type, body, booking_id, read_at, channels_sent[]</td></tr>
+    <tr><td class="n">offers</td><td>code, audience (driver / host), effect (discount / fee_rate / bonus / boost), time_windows, demand_condition, cap, budget, valid_until</td></tr>
+    <tr><td class="n">favourites</td><td>user_id, charger_id</td></tr>
+    <tr><td class="n">vans</td><td>id, operator_id, reg_no, kw, battery_left_kwh, location, status</td></tr>
+  </table></div>
+
+  <h2>7. Tech stack</h2>
+  <div class="tbl"><table>
+    <tr><th>Layer</th><th>MVP choice (built)</th><th>Production choice</th></tr>
+    <tr><td>Frontend</td><td>Single-page web app, plain HTML/CSS/JS, works on phones</td><td>Next.js PWA, later React Native for background GPS</td></tr>
+    <tr><td>Backend</td><td>Browser storage, so the demo runs with no server</td><td>Node.js (NestJS) or Supabase (Postgres, auth, realtime)</td></tr>
+    <tr><td>Database</td><td>Seeded demo data in the app</td><td>Postgres + PostGIS; Redis for geo index, locks and live state</td></tr>
+    <tr><td>Realtime</td><td>Timers simulate host replies and travel</td><td>WebSockets (Socket.IO / Supabase Realtime / Ably)</td></tr>
+    <tr><td>Maps and ETA</td><td>Stylised SVG map, distance-based ETA</td><td>Google Maps Platform or Mapbox; OSRM on OpenStreetMap to save cost</td></tr>
+    <tr><td>Payments</td><td>Simulated UPI, wallet, promos</td><td>Razorpay (UPI mandates, Route split payouts) or Cashfree</td></tr>
+    <tr><td>Notifications</td><td>In-app inbox and bell for each app, toasts</td><td>Firebase Cloud Messaging, SMS, WhatsApp Business API, Exotel number masking</td></tr>
+    <tr><td>Metering</td><td>Estimate from battery % and charger kW</td><td>Smart plugs, then an OCPP server for smart chargers</td></tr>
+    <tr><td>Photos</td><td>Phone camera via file input, resized and stored in the browser</td><td>Pre-signed upload to S3 / Cloudinary, CDN delivery, image moderation</td></tr>
+    <tr><td>Hosting</td><td>Static page (published link)</td><td>Vercel + Supabase, or AWS Mumbai region</td></tr>
+  </table></div>
+
+  <h2>8. The 14-day plan</h2>
+  <div class="tbl"><table>
+    <tr><th>Days</th><th>Goal</th><th>Done when</th></tr>
+    <tr><td class="day">1</td><td>Lock the problem, personas (driver, host, van operator) and the one-line pitch</td><td>A one-page brief and the demo story</td></tr>
+    <tr><td class="day">2</td><td>Wireframes for key screens; data model and booking states</td><td>Screens sketched, states agreed</td></tr>
+    <tr><td class="day">3–4</td><td>Explore: map, filters, listing page, favourites, chat</td><td>A driver can find and inspect a charger</td></tr>
+    <tr><td class="day">5–6</td><td>Booking: instant and request, wallet and UPI, promos, states, ETA, PIN, live session, receipt, rating</td><td>End-to-end booking works</td></tr>
+    <tr><td class="day">7</td><td>Charge now matching and peak pricing</td><td>One tap gives a sensible match</td></tr>
+    <tr><td class="day">8</td><td>Host: listing form, requests inbox, toggles, earnings</td><td>A new listing appears for drivers</td></tr>
+    <tr><td class="day">9</td><td>Van rescue and platform view</td><td>Both revenue lines visible</td></tr>
+    <tr><td class="day">10–11</td><td>Test with 5 real people (EV owners and shop owners); sign up 3 pilot hosts if you can</td><td>Feedback notes and 3 fixes</td></tr>
+    <tr><td class="day">12</td><td>Polish, phone check, seed real chargers and prices for your city</td><td>No broken screens on a phone</td></tr>
+    <tr><td class="day">13</td><td>Record a 2–3 minute demo video; write the submission</td><td>Video and deck ready</td></tr>
+    <tr><td class="day">14</td><td>Buffer, final review, submit</td><td>Submitted early</td></tr>
+  </table></div>
+  <p>The app delivered with this blueprint already covers days 2 to 9, so you can spend the rest on real users, pilot hosts and the pitch.</p>
+
+  <h2>9. Unit economics and risks</h2>
+  <div class="math">Car session:   15 kWh × ₹16/kWh = ₹240     platform 15% = ₹36    host gets ₹204
+               Host's power cost ≈ 15 × ₹9 = ₹135 → host profit ≈ ₹69
+Peak session:  same car at 7 pm: ₹19/kWh → ₹285, platform ₹43
+Scooter:       2 kWh × ₹13/kWh  = ₹26      platform 15% = ₹3.9
+Van rescue:    ₹199 call-out + 6 kWh × ₹22 = ₹331   platform 20% = ₹66
+Driver saving: 15 kWh ≈ 105 km in a car; petrol for 105 km ≈ ₹600 vs ₹240
+One locality:  40 hosts × 3 sessions/day × ₹20 avg fee ≈ ₹72,000 / month</div>
+  <p>Later revenue lines: a monthly driver pass with lower prices, featured listings for shop hosts, and B2B plans for delivery and e-auto operators who need daily top-ups.</p>
+  <div class="callout"><strong>Regulation to check early:</strong> India's Ministry of Power guidelines treat EV charging as a service and allow it without a licence, and many DISCOMs offer a separate EV tariff. Whether a host may charge strangers from a normal domestic meter varies by state and DISCOM. In the pitch, say "hosts use an EV-tariff connection or a sub-meter", and verify with your local DISCOM before a real launch. A prepaid wallet also falls under RBI rules, so use a licensed partner's wallet.</div>
+  <ul>
+    <li><strong>Cold start:</strong> launch in one area (a college campus or one locality), sign up 15–20 shop hosts by hand, and target delivery riders and e-autos first because they charge every day.</li>
+    <li><strong>Safety:</strong> require an earthed socket or certified charger, and add host insurance later.</li>
+    <li><strong>Leakage:</strong> keep both sides on the platform with booking guarantees, payment protection, ratings, wallet credits and promos.</li>
+    <li><strong>Disputes:</strong> the start PIN plus timestamps for every booking state give a clear record; move busy hosts to smart plugs early.</li>
+  </ul>
+
+  <h2>10. How to demo it to judges</h2>
+  <ol>
+    <li>In the <b>Driver app</b> at 18% battery, tap <em>Charge now</em>, show the best match and "next option". Point out that prices shown already include time of day and demand.</li>
+    <li>Open <em>Ravi Auto Spares</em>: photo gallery, technical details, amenities. Choose <em>Offer your price</em>, slide to ₹13 and send.</li>
+    <li>Switch to the <b>Host app</b> (the badge shows the new offer). Counter at ₹15. Switch back and accept the counter in the Driver app.</li>
+    <li>Start navigation; the Host app shows "Aarav is on the way". Skip to arrival, take a check-in photo, and read the PIN.</li>
+    <li>In the Host app, type the PIN to start charging and show kWh and earnings ticking live. Stop the session; both bells show the payment and earnings.</li>
+    <li>Show the receipt in the Driver app (fee, host payout, petrol saving) and rate with a photo.</li>
+    <li>In the Host app: post a new ad with the camera, raise the night price on <em>Pricing</em>, and activate BOOST24 on <em>Offers</em>. Back in the Driver app, the new ad is featured and the coupons tab shows what is live now.</li>
+    <li>End on <b>Admin</b> with the revenue chart, and mention the charging van for nearly empty batteries.</li>
+  </ol>
+
+  <footer>Figures are planning estimates for India (late 2026) and should be checked against your city's tariffs and fuel prices before the final pitch.</footer>
+</div>
