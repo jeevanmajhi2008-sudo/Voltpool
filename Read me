@@ -17,4 +17,3 @@ VoltPool takes a 15% commission on every session. It also earns from mobile van 
 # Tech
 A single-page web app (HTML, CSS and JavaScript) with a shared data store and a localStorage fallback. It needs no hardware.
 
-#Run it
